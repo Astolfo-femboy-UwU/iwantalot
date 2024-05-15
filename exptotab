@@ -1,0 +1,44 @@
+import math
+tabl = ''.join([i for i in input("Значение лоической функции (крайний правый столбец в таблице истинности): ") if i in "01"])
+ln = int(math.log(len(tabl), 2))
+assert len(tabl) == 2**ln, f"В столбце под номером {ln} таблицы должно быть 2^{ln}={2**ln} результатов операций, Вы ввели {len(tabl)}"
+
+add_arr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[0:ln]
+fin_expr = ""
+to_request = {"(" : "%28", "&" : "%26", "!" : "%21", ")" : "%29"}
+tab_1 = [list(map(int, bin(i)[2::].zfill(ln))) for i in range(2 ** ln)]
+for i in range(0, 2 ** ln):
+  tab_1[i].append(int(tabl[i]))
+print(end=" ")
+print(*[i for i in add_arr], sep="  ", end="  ")
+print("Res")
+print(*tab_1, sep="\n")
+
+fin_expr = ""
+for i in tab_1:
+  if i[ln] == 1:
+    for j in range(ln):
+      fin_expr += ("" if i[j] else "!") + add_arr[j] + ("&" if j != ln - 1 else ")v(")
+
+fin_expr = "(" + fin_expr[0:len(fin_expr)-3] + ")"
+print("СДНФ:", fin_expr)
+
+request_text = "https://www.kontrolnaya-rabota.ru/s/mathlogic/?expr="
+for i in fin_expr:
+  request_text += to_request[i] if i in to_request.keys() else i
+print("Упрощение:", request_text)
+
+fin_expr = ""
+
+for i in tab_1:
+  if i[ln] == 0:
+    for j in range(ln):
+      fin_expr += ("!" if i[j] else "") + add_arr[j] + ("v" if j != ln - 1 else ")&(")
+
+fin_expr = "(" + fin_expr[0:len(fin_expr)-3] + ")"
+print("СКНФ:", fin_expr)
+
+request_text = "https://www.kontrolnaya-rabota.ru/s/mathlogic/?expr="
+for i in fin_expr:
+  request_text += to_request[i] if i in to_request.keys() else i
+print("Упрощение:", request_text)
