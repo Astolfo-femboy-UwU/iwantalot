@@ -1,0 +1,67 @@
+import string
+symbols = string.digits + string.uppercase
+
+def _int_from_base(number, original_base):
+
+    return int(number, original_base)
+
+def _int_to_base(number, new_base):
+
+    # Uses "the division method"
+    sign = -1 if number < 0 else 1
+    number *= sign
+    ans = ''
+    while number:
+        ans += symbols[number % new_base]
+        number //= new_base
+    if sign == -1:
+        ans += '-'
+    return ans[::-1]
+
+def _fractional_from_base(number, original_base):
+
+    # The value of a symbol at position i after the decimal point is, by 
+    # definition, the value of that symbol * b^-i
+    ans = 0
+    for i in xrange(1, len(number)+1):
+        ans += symbols.index(number[i-1]) * original_base**-i
+    return ans
+
+def _fractional_to_base(number, new_base, precision=5):
+
+    # I don't know what this method is called
+    ans = ''
+    for i in xrange(precision):
+        tmp = number * new_base
+        itmp = int(tmp)
+        ans += str(symbols[itmp])
+        number = tmp - itmp
+    return ans
+
+def convert(number, original_base, new_base, precision=None):
+    """Converts any number from any base to any other base (2 <= base <= 36).
+
+    number should be a string representing a float in any base, e.g. '1.23'.
+
+    original_base, new_base should be integers representing the desired bases.
+
+    precision should be an integer representing how many digits after the 
+    decimal point will be calculated on the conversion. Default is the same 
+    number as the number of digits after the decimal point on number.
+    """
+
+    try:
+        integer_part, fractional_part = number.split('.')
+        precision = len(fractional_part) if precision is None else precision
+        integer_part = _int_to_base(
+            _int_from_base(integer_part, original_base),
+            new_base
+        )
+        fractional_part = _fractional_to_base(
+            _fractional_from_base(fractional_part, original_base),
+            new_base,
+            precision
+        )
+        return integer_part+'.'+fractional_part
+    except ValueError:      # number was a str representing an int not a float
+        return _int_to_base(_int_from_base(number, original_base), new_base)
